@@ -1,0 +1,186 @@
+---
+title: "220412.exercise.challenge"
+author: "Karim Primov"
+date: "4/12/2022"
+output: html_document
+---
+
+```{r}
+library(tidyverse)
+library(mosaic)
+library(car)
+library(broom)
+library(ggplot2)
+library(infer)
+library(dplyr)
+```
+
+```{r}
+f <- "https://raw.githubusercontent.com/difiore/ada-2022-datasets/main/AVONETdataset1.csv"
+d <- read_csv(f, col_names = TRUE)
+names(d)
+```
+
+Keeping these 19 variables:
+```{r}
+df <- d %>%
+  select(Species1, Family1, Order1, Beak.Length_Culmen, Beak.Width, Beak.Depth, Tarsus.Length, Wing.Length, Tail.Length, Mass, Habitat, Migration, Trophic.Level, Trophic.Niche, Primary.Lifestyle, Min.Latitude, Max.Latitude, Centroid.Latitude, Range.Size)
+
+```
+
+Relative Beak length
+```{r}
+rel.beak.length <- lm(data = df, log(Beak.Length_Culmen) ~ log(Mass))
+rel.beak.length$residuals
+```
+
+Relative Tarsus Length 
+```{r}
+rel.tarsus.length <- lm(data = df, log(Tarsus.Length) ~ log(Mass))
+rel.tarsus.length$residuals
+```
+
+
+Mutating relative beak length and relative tarsus length to dataframe "df" into new dataframe "df"
+```{r}
+df <- df %>%
+  mutate(Relative.Beak.Length = rel.beak.length$residuals) %>%
+  mutate(Relative.Tarsus.Length = rel.tarsus.length$residuals)
+```
+
+Boxplot of relative tarsus length by primary lifestyle
+```{r}
+boxplot.tarsus.lifestyle <- ggplot(df, aes(x = Primary.Lifestyle, y = Relative.Tarsus.Length)) + geom_boxplot()
+boxplot.tarsus.lifestyle
+```
+
+Boxplot of relative beak length by trophic niche
+```{r}
+boxplot.beak.niche <- ggplot(df, aes(x = Trophic.Niche, y = Relative.Beak.Length)) + geom_boxplot()
+boxplot.beak.niche
+```
+Run ANOVA to look at association between geographic range size and migratory status 
+```{r}
+grs.mig.aov <- aov(data = df, Range.Size ~ Migration)
+summary(grs.mig.aov)
+```
+
+
+Limit data to Passeriformes
+
+Filtering dataframe 
+
+```{r}
+df.pass <- df %>%
+  filter(Order1 == "Passeriformes")
+```
+
+
+ANOVA looking at association between relative beak length and primary lifestyle 
+```{r}
+rbl.pl.aov <- aov(data = df.pass, Relative.Beak.Length ~ Primary.Lifestyle) 
+summary(rbl.pl.aov)
+```
+
+ANOVA looking at association between relative beak length and trophic level  
+```{r}
+rbl.tl.aov <- aov(data = df.pass, Relative.Beak.Length ~ Trophic.Level)
+summary(rbl.tl.aov)
+```
+
+
+```{r}
+boxplot.beak.troph.level <- ggplot(df, aes(x = Trophic.Level, y = Relative.Beak.Length)) + geom_boxplot()
+boxplot.beak.troph.level
+```
+#facet-wrapping
+```{r}
+boxplot.beak.primary.lifestyle <- ggplot(df, aes(x = Primary.Lifestyle, y = Relative.Beak.Length)) + geom_boxplot()
+boxplot.beak.primary.lifestyle
+```
+
+Combined Effects of predictors (primary lifestyle and trophic level)
+```{r}
+p <- ggplot(data=df, aes(x = Relative.Beak.Length, y = Primary.Lifestyle)) + geom_boxplot() +
+  facet_wrap(~Trophic.Level, ncol=1) +
+  xlab("Relative Beak Length") + ylab("Primary Lifestyle")
+# and let's plot what the data look like
+# p <- p + geom_point() # uncommenting this shows all points
+p <- p + stat_summary(data=df, aes(x = Relative.Beak.Length, y = Primary.Lifestyle),
+  fun = base::mean,
+  # make sure we use {base} version of mean
+  color = "darkgreen", geom = "point", shape = 8, size = 6)
+p
+```
+Step 5:
+```{r}
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```

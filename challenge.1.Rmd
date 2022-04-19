@@ -1,0 +1,117 @@
+---
+title: "220407.exercise"
+author: "Karim Primov"
+date: "4/7/2022"
+output: html_document
+---
+
+```{r}
+library(tidyverse)
+library(mosaic)
+library(car)
+library(broom)
+library(ggplot2)
+library(infer)
+```
+
+```{r}
+f <- "https://raw.githubusercontent.com/difiore/ada-2022-datasets/main/AVONETdataset1.csv"
+d <- read_csv(f, col_names = TRUE)
+names(d)
+```
+Keeping these 16 variables:
+```{r}
+df <- d %>%
+  select(Species1, Family1, Order1, Beak.Width, Beak.Depth, Tarsus.Length, Wing.Length, Tail.Length, Mass, Habitat, Migration, Trophic.Level, Trophic.Niche, Min.Latitude, Max.Latitude, Centroid.Latitude, Range.Size)
+library(skimr)
+skim(df)
+```
+Plot body mass as a function of trophic level and migration category
+
+Trophic level:mass
+```{r}
+ggplot(data = d %>% drop_na(Trophic.Level),
+       aes(x = Trophic.Level, y = log(Mass))) +
+  geom_violin()
+```
+
+Migration:Mass
+```{r}
+ggplot(data = d %>% drop_na(Migration),
+       aes(x = as.factor(Migration), y = log(Mass))) +
+ geom_violin()
+```
+
+Run linear models 
+```{r}
+m1 <- lm(log(Mass) ~ Trophic.Level, data = df)
+m2 <- lm(log(Mass) ~ as.factor(Migration), data = df)
+
+df2 <- df %>% mutate(Migration = as.factor(Migration))
+m2 <- lm(log(Mass) ~ Migration, data = df2)
+```
+
+```{r}
+summary(m1)
+```
+
+```{r}
+summary(m2)
+```
+
+```{r}
+df2b <- df2 %>% mutate(Migration = relevel(Migration, ref = "3"))
+m3 <- lm(log(Mass) ~ Migration, data = df2b)
+summary(m3)
+```
+Permutation approach to inference 
+```{r}
+original.F <- aov(log(Mass) ~ Trophic.Level, data = df2b) %>%
+  tidy() %>%
+  filter(term == "Trophic.Level")
+original.F
+```
+
+```{r}
+d <- df2b %>% mutate(logMass = log(Mass))
+permuted.F <- d %>%
+  specify(logMass ~ Trophic.Level) %>%
+  hypothesize(null = "independence") %>%
+  generate(reps = 1000, type = "permute") %>%
+  calculate(stat = "F")
+visualize(permuted.F) + shade_p_value(obs_stat = original.F$statistic, direction = "greater")
+p.value <- permuted.F %>% get_p_value(obs_stat = original.F$statistic, direction = "greater")
+```
+
+```{r}
+original.F$p.value
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
